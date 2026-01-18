@@ -1,0 +1,5 @@
+temp/
+test/
+debug.js
+.env
+node_modules/
