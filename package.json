@@ -21,7 +21,8 @@
     "firebase-admin": "^13.6.0",
     "pg": "^8.17.2",
     "reflect-metadata": "^0.2.2",
-    "typeorm": "^0.3.28"
+    "typeorm": "^0.3.28",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "jest": "^29.7.0",

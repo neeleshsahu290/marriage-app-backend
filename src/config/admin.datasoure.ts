@@ -18,7 +18,7 @@ export const AdminDataSource = new DataSource({
     rejectUnauthorized: false,
   },
 
-  synchronize: false,
+  synchronize: true,
   logging: false,
 
   entities: [User, UserProfile],

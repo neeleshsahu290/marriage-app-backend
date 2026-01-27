@@ -7,28 +7,24 @@ import { AdminDataSource } from "../config/admin.datasoure";
 //import { SUCCESS, ERRORS } from "../constants/statusCodes";
 //import { success } from "../utils/responseHandler";
 
-const userProfileRepository = AdminDataSource.getRepository(UserProfile);
+// controllers/user.controller.ts
+import { upsertUserProfile } from "../services/user.service.js";
 
-export default class UserController {
+export const createOrUpdateProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const result = await upsertUserProfile(req.body);
 
-  public static async createProfile(req: Request, res: Response, next:NextFunction) {
-    try {
-
-      const profile = userProfileRepository.create(req.body);
-      const data = await userProfileRepository.save(profile);
-
-      return success(
-        res,
-        SUCCESS.OK,
-        data,
-        "Profile created successfully"
-      );
-
-    } catch (error: any) {
-
-    next(error)
-
-    }
+    return success(
+      res,
+      SUCCESS.OK,
+      result,
+      "Profile created or updated successfully"
+    );
+  } catch (error) {
+    next(error);
   }
-
-}
+};
