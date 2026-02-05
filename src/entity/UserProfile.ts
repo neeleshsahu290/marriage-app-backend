@@ -4,95 +4,188 @@ import {
   PrimaryColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToOne,
+  JoinColumn,
 } from "typeorm";
+import { User } from "./User";
 
-@Entity("user_profile")
+export enum Gender {
+  MALE = "MALE",
+  FEMALE = "FEMALE",
+}
+export enum Religion {
+  ISLAM = "ISLAM",
+  CHRISTIANITY = "CHRISTIANITY",
+  HINDUISM = "HINDUISM",
+  SIKHISM = "SIKHISM",
+  BUDDHISM = "BUDDHISM",
+  JAINISM = "JAINISM",
+  JUDAISM = "JUDAISM",
+  BAHAI = "BAHAI",
+  ZOROASTRIANISM = "ZOROASTRIANISM",
+  OTHER = "OTHER",
+}
+
+export enum ReligiousFaith {
+  STRICT = "STRICT",
+  MODERATE = "MODERATE",
+  FLEXIBLE = "FLEXIBLE",
+}
+
+export enum MaritalStatus {
+  NEVER_MARRIED = "NEVER_MARRIED",
+  SEPARATED = "SEPARATED",
+  DIVORCED = "DIVORCED",
+  WIDOWED = "WIDOWED",
+}
+
+
+export enum FamilyType {
+  NUCLEAR = "NUCLEAR",
+  JOINT = "JOINT",
+  EXTENDED = "EXTENDED",
+}
+
+
+export enum ParentsStatus {
+  LIVING_TOGETHER = "LIVING_TOGETHER",
+  SEPARATED = "SEPARATED",
+  FATHER_PASSED = "FATHER_PASSED",
+  BOTH_PASSED = "BOTH_PASSED",
+}
+
+export enum EducationLevel {
+  SECONDARY = "SECONDARY",
+  HIGH_SCHOOL = "HIGH_SCHOOL",
+  NON_DEGREE = "NON_DEGREE",
+  BACHELORS = "BACHELORS",
+  MASTERS = "MASTERS",
+  DOCTORATE = "DOCTORATE",
+  OTHER = "OTHER",
+}
+
+export enum Profession {
+  IT = "IT",
+  HEALTHCARE = "HEALTHCARE",
+  EDUCATION = "EDUCATION",
+  BUSINESS = "BUSINESS",
+  FINANCE = "FINANCE",
+  GOVERNMENT = "GOVERNMENT",
+  LEGAL = "LEGAL",
+  ENGINEERING = "ENGINEERING",
+  SALES = "SALES",
+  DESIGN = "DESIGN",
+  MEDIA = "MEDIA",
+  ARCHITECTURE = "ARCHITECTURE",
+  MANUFACTURING = "MANUFACTURING",
+  HOSPITALITY = "HOSPITALITY",
+  AVIATION = "AVIATION",
+  AGRICULTURE = "AGRICULTURE",
+  SELF_EMPLOYED = "SELF_EMPLOYED",
+  HOMEMAKER = "HOMEMAKER",
+  STUDENT = "STUDENT",
+  RETIRED = "RETIRED",
+  OTHER = "OTHER",
+}
+export enum MarriagePriority {
+  WITHIN_6_MONTHS = "WITHIN_6_MONTHS",
+  SIX_TO_TWELVE_MONTHS = "SIX_TO_TWELVE_MONTHS",
+  ONE_TO_TWO_YEARS = "ONE_TO_TWO_YEARS",
+  TWO_PLUS_YEARS = "TWO_PLUS_YEARS",
+}
+
+
+@Entity({ name: "user_profile", synchronize: true })
 export class UserProfile {
-
   @PrimaryColumn("uuid")
   user_id: string;
 
-  @Column({ type: "enum", enum: ["Male", "Female"] })
-  gender: string;
-
   @Column()
-  first_name: string;
-
-  @Column({ nullable: true })
-  middle_name?: string;
-
-  @Column()
-  last_name: string;
+  full_name: string;
 
   @Column({ type: "date" })
   dob: string;
 
-  @Column({ nullable: true })
-  height_cm?: number;
+  @Column({ type: "enum", enum: Gender })
+  gender: string;
 
-  @Column({ type: "enum", enum: ["Single", "Divorced", "Widowed", "Separated"] })
-  marital_status: string;
+@Column({ type: "decimal", precision: 5, scale: 2, nullable: true })
+height_cm?: number;
 
-  @Column({ type: "enum", enum: ["Soon", "Take Time", "Long"] })
-  marriage_priority: string;
-
-  @Column()
+  @Column({
+    type: "enum",
+    enum: Religion,
+  })
   religion: string;
 
-  @Column()
-  born_religion: boolean;
-
-  @Column()
-  faith_level: string;
-
-  @Column()
-  religious_commitment: string;
-
-  @Column({ nullable: true })
-  community?: string;
-
-  @Column({ nullable: true })
-  ethnicity?: string;
-
-  @Column()
-  eat_halal: boolean;
-
-  @Column()
-  smoke: string;
-
-  @Column()
-  drink: string;
-
-  @Column()
-  has_children: string;
-
-  @Column()
-  move_abroad: boolean;
-
-  @Column()
-  profession: string;
-
-  @Column()
-  education_level: string;
-
-  @Column()
-  nationality: string;
-
-  @Column()
-  birth_country: string;
+  @Column({
+    type: "enum",
+    enum: ReligiousFaith,
+  })
+  religious_faith: string;
 
   @Column({ type: "jsonb", nullable: true })
-  personality_tags: any;
+  languages_known?: any;
 
-  @Column({ type: "jsonb", nullable: true })
-  interests: any;
-
-  @Column({ length: 250, nullable: true })
+  @Column({ length: 500, nullable: true })
   bio?: string;
 
-  @CreateDateColumn()
+  @Column({
+    type: "enum",
+    enum: MaritalStatus,
+  })
+  marital_status: string;
+
+  @Column()
+  has_children: boolean;
+
+  @Column({
+    type: "enum",
+    enum: FamilyType,
+  })
+  family_type: string;
+
+  @Column({
+    type: "enum",
+    enum: ParentsStatus,
+  })
+  parents_status: string;
+
+  @Column({
+    type: "enum",
+    enum: EducationLevel,
+  })
+  education_level: string;
+
+  @Column({
+    type: "enum",
+    enum: Profession,
+  })
+  profession: string;
+
+  @Column({ type: "jsonb", nullable: true })
+  personality_traits?: any;
+
+  @Column({ type: "jsonb", nullable: true })
+  hobbies?: any;
+
+  @Column({ type: "jsonb", nullable: true })
+  profile_photos?: any;
+
+  @Column({ type: "jsonb", nullable: true })
+  habits?: any;
+
+  @Column({
+    type: "enum",
+    enum: MarriagePriority,
+  })
+  marriage_priority: string;
+
+  @CreateDateColumn({ type: "timestamp" })
   created_at: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: "timestamp" })
   updated_at: Date;
+
+
 }

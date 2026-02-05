@@ -1,18 +1,24 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
     "module": "CommonJS",
-  //  "moduleResolution": "node",
+    "moduleResolution": "node",
+    "target": "ES2022",
+
+    "rootDir": "src",
+    "outDir": "dist",
+
+    "strict": true,
+    "strictPropertyInitialization": false,
+
+    "esModuleInterop": true,
 
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
-    "strict": false,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
+    "allowJs": true,
+    "checkJs": false,
 
-   // "outDir": "dist"
+    "typeRoots": ["./src/@types", "./node_modules/@types"]
   },
   "include": ["src/**/*"]
 }
- 

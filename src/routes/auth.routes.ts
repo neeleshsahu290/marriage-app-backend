@@ -1,8 +1,8 @@
 import express from "express";
 import {createUser,login,me,sendEmailOtp,verifyEmailOtp,  sendPhoneOtp,
   verifyPhoneOtp,
- } from "../controllers/auth.controller.js";
-// import authMiddleware from "../middleware/auth.middleware.js";
+  createBulkUser,
+ } from "../controllers/auth.controller";
 
 const router = express.Router();
 
@@ -19,6 +19,7 @@ router.post("/users", createUser);
 router.post("/login", login);
 router.get("/me", me);
 
+router.post("/create-bulk-users", createBulkUser);
 
 
 

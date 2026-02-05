@@ -1,25 +1,21 @@
 import express from "express";
-import {createOrUpdateProfile
+import {getAllProfiles, upsertProfile,updateUserField,updateUserFields, upsertPreferencesOnly
  } from "../controllers/user.controller"
-// import authMiddleware from "../middleware/auth.middleware.js";
+ import{ authMiddleware} from "../middleware/auth.middleware";
 
 const router = express.Router();
 
 //Auth
 
-router.post("/send-email-otp", createOrUpdateProfile)
-router.post("/verify-email-otp", verifyEmailOtp);
-
-router.post("/send-phone-otp", sendPhoneOtp);
-router.post("/verify-phone-otp", verifyPhoneOtp);
+router.post("/profile",authMiddleware ,upsertProfile);
+router.post("/preferences",authMiddleware ,upsertPreferencesOnly);
 
 
-router.post("/users", createUser);
-router.post("/login", login);
-router.get("/me", me);
+router.get("/all-profiles", getAllProfiles);
 
+router.put("/update-field", authMiddleware, updateUserField);
 
-
+router.put("/update-fields", authMiddleware, updateUserFields);
 
 export default router;
 

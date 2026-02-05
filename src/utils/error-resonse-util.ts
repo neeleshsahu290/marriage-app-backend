@@ -22,10 +22,28 @@ class ErrorResponse {
       });
     }
 
-    res.status(err.statusCode || 500).json({
-      error: err.message || "Internal server error",
+   const status =
+      err.status ||
+      err.statusCode ||
+      err.httpCode ||
+      500;
+
+    const code =
+      err.code ||
+      err.errorCode ||
+      'internal_server_error';
+
+    const message =
+      err.message ||
+      err.error ||
+      'Internal server error';
+
+    return res.status(status).json({
       success: false,
+      code,
+      message,
     });
+  
   }
 }
 

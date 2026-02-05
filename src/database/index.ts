@@ -1,5 +1,5 @@
-import { SupabaseUserRepository } from "./supabase/user.repo.js";
-import { SupabaseAuthRepository } from "./supabase/auth.repo.js";
+import { SupabaseUserRepository } from "./supabase/user.repo";
+import { SupabaseAuthRepository } from "./supabase/auth.repo";
 
 //  Change this line in future
 export const userRepository = new SupabaseUserRepository();

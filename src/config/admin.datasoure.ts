@@ -3,6 +3,8 @@ import { DataSource } from "typeorm";
 import 'dotenv/config'
 import { UserProfile } from "../entity/UserProfile";
 import { User } from "../entity/User";
+import { Match } from "../entity/Match";
+import { UserPreference } from "../entity/UserPreference";
 
 
 
@@ -21,7 +23,7 @@ export const AdminDataSource = new DataSource({
   synchronize: true,
   logging: false,
 
-  entities: [User, UserProfile],
+  entities: [User, UserProfile,Match,UserPreference],
   migrations: [],
   subscribers: [],
 });
