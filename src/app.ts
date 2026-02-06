@@ -1,3 +1,5 @@
+import dns from "dns";
+dns.setDefaultResultOrder("ipv4first");
 
 
 import express from "express";
@@ -5,6 +7,7 @@ import cors from "cors";
 import routes from "./routes/index";
 import { AdminDataSource } from "./config/admin.datasoure";
 import ErrorResponse from "./utils/error-resonse-util";
+
 const app = express();
 
 app.use(cors());

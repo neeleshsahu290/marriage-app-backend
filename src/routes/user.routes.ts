@@ -8,7 +8,7 @@ const router = express.Router();
 //Auth
 
 router.post("/profile",authMiddleware ,upsertProfile);
-router.post("/preferences",authMiddleware ,upsertPreferencesOnly);
+router.put("/preferences",authMiddleware ,upsertPreferencesOnly);
 
 
 router.get("/all-profiles", getAllProfiles);

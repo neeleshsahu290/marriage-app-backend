@@ -60,7 +60,7 @@ export class User {
   @Column({
     type: "enum",
     enum: PhotoVisibility,
-    default: PhotoVisibility.BLURRED_PREVIEW,
+    default: PhotoVisibility.VISIBLE_TO_MATCHES,
   })
   photo_visibility: PhotoVisibility;
 
