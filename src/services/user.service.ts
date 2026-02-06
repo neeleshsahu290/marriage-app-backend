@@ -177,6 +177,11 @@ export const upsertUserProfile = async (data: Partial<UserProfile>) => {
 
   await userProfileRepository.upsert(payload, ["user_id"]);
 
+  // 2️⃣ Mark onboarding as completed
+  await userRepository.update(
+    {id: user_id },
+    { onboarding_completed: true }
+  );
   return userProfileRepository.findOne({
     where: { user_id },
   });
