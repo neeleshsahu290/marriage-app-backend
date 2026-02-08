@@ -118,11 +118,13 @@ height_cm?: number;
   })
   religion: string;
 
-  @Column({
-    type: "enum",
-    enum: ReligiousFaith,
-  })
-  religious_faith: string;
+@Column({
+  type: "enum",
+  enum: ReligiousFaith,
+  nullable: true,
+})
+religious_faith?: ReligiousFaith | null;
+
 
   @Column({ type: "jsonb", nullable: true })
   languages_known?: any;
@@ -146,10 +148,11 @@ height_cm?: number;
   family_type: string;
 
   @Column({
-    type: "enum",
-    enum: ParentsStatus,
-  })
-  parents_status: string;
+  type: "enum",
+  enum: ParentsStatus,
+  nullable: true,
+})
+parents_status: ParentsStatus | null;
 
   @Column({
     type: "enum",
