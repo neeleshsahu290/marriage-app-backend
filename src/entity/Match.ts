@@ -30,13 +30,17 @@ export class Match {
 
   @Column("uuid")
   receiver_id: string;
-
+  
   @Column({
     type: "enum",
     enum: MatchStatus,
     default: MatchStatus.SENT,
   })
   status: string;
+
+
+  @Column({ type: "uuid", nullable: true })
+  action_by: string | null;
 
   @CreateDateColumn()
   created_at: Date;

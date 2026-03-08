@@ -1,5 +1,11 @@
 temp/
 test/
 debug.js
-.env
 node_modules/
+dist/
+.env
+.env.*
+coverage/
+build/
+*.log
+.DS_Store

@@ -39,14 +39,29 @@ export const sendMatchRequest = async (
 
 export const changeMatchStatus = async (
   match_id: string,
-  status: MatchStatus.ACCEPTED | MatchStatus.REJECTED | MatchStatus.BLOCKED | MatchStatus.PASS | MatchStatus.SENT | MatchStatus.RECOMMENDED,
+  user_id: string,
+  status: MatchStatus
 ) => {
 
   const match = await matchRepository.findOneBy({ id: match_id });
 
-  if (!match) throw new Error("Match not found");
+  if (!match) {
+    throw new Error("Match not found");
+  }
 
+  // ensure user belongs to this match
+  if (
+    match.requester_id !== user_id &&
+    match.receiver_id !== user_id
+  ) {
+    throw new Error("Unauthorized action");
+  }
+
+  // update status
   match.status = status;
+
+  // record who performed the action
+  match.action_by = user_id;
 
   return matchRepository.save(match);
 };
@@ -186,19 +201,19 @@ export const createRecommendedMatchesService = async (currentUserId: string) => 
     throwError(ERRORS.NOT_FOUND, "User not found");
   }
 
-  if (currentUser!.last_recommended_at) {
-    const lastTime = new Date(currentUser!.last_recommended_at).getTime();
-    const now = Date.now();
+  // if (currentUser!.last_recommended_at) {
+  //   const lastTime = new Date(currentUser!.last_recommended_at).getTime();
+  //   const now = Date.now();
 
-    const diffHours = (now - lastTime) / (1000 * 60 * 60);
+  //   const diffHours = (now - lastTime) / (1000 * 60 * 60);
 
-    if (diffHours < 24) {
-      throwError(
-        ERRORS.BAD_REQUEST,
-        "Recommendations already generated recently. Try later."
-      );
-    }
-  }
+  //   if (diffHours < 24) {
+  //     throwError(
+  //       ERRORS.BAD_REQUEST,
+  //       "Recommendations already generated recently. Try later."
+  //     );
+  //   }
+  // }
 
   const currentProfile = await userProfileRepository.findOne({
     where: { user_id: currentUserId }
@@ -224,7 +239,7 @@ export const createRecommendedMatchesService = async (currentUserId: string) => 
       )
     `)
     .setParameter("currentUserId", currentUserId)
-    .limit(10)
+    // .limit(10)
     .getMany();
 
   if (!users.length) {

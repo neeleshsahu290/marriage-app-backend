@@ -13,13 +13,13 @@ import { email } from "zod";
 import { UserPreference } from "../entity/UserPreference";
 const userProfileRepository = AdminDataSource.getRepository(UserProfile);
 const userRepository = AdminDataSource.getRepository(User);
-const userPreferenceRepository =  AdminDataSource.getRepository(UserPreference)
+const userPreferenceRepository = AdminDataSource.getRepository(UserPreference);
 
 /**
  * CREATE USER SERVICE
  */
 export const createUserService = async (payload: any) => {
-  const { phone, email, password,phone_verified, email_verified} = payload;
+  const { phone, email, password, phone_verified, email_verified } = payload;
 
   if (!phone && !email) {
     throwError(ERRORS.BAD_REQUEST, "Phone or email is required");
@@ -43,33 +43,31 @@ export const createUserService = async (payload: any) => {
     phone: phone ?? null,
     email: email ?? null,
     password_hash: passwordHash,
-    phone_verified: phone_verified??false,
-    email_verified: email_verified??false,
+    phone_verified: phone_verified ?? false,
+    email_verified: email_verified ?? false,
     onboarding_completed: false,
     is_active: true,
   } as DeepPartial<User>);
 
   const savedUser = await userRepository.save(user);
 
- return {
-      access_token: generateToken({ user_id: user!.id }),
+  return {
+    access_token: generateToken({ user_id: user!.id }),
 
-  user: {
-    user_id: savedUser.id,
-    phone: savedUser.phone,
-    email: savedUser.email,
-    is_active: user!.is_active,
-    show_online_status: user!.show_online_status,
-    show_email: user!.show_email,
-    show_phone: user!.show_phone,
-    photo_visibility: user!.photo_visibility,
-    onboarding_completed: user!.onboarding_completed,
-    created_at: savedUser.created_at,
-  }
-}
+    user: {
+      user_id: savedUser.id,
+      phone: savedUser.phone,
+      email: savedUser.email,
+      is_active: user!.is_active,
+      show_online_status: user!.show_online_status,
+      show_email: user!.show_email,
+      show_phone: user!.show_phone,
+      photo_visibility: user!.photo_visibility,
+      onboarding_completed: user!.onboarding_completed,
+      created_at: savedUser.created_at,
+    },
+  };
 };
-
-
 
 /**
  * LOGIN SERVICE
@@ -173,23 +171,23 @@ export const upsertUserProfile = async (data: Partial<UserProfile>) => {
     habits: data.habits ?? null,
 
     marriage_priority: data.marriage_priority,
+
+    city: data.city ?? undefined,
+    country: data.country ?? undefined,
+    latitude: data.latitude ?? undefined,
+    longitude: data.longitude ?? undefined,
   };
 
   await userProfileRepository.upsert(payload, ["user_id"]);
 
   // 2️⃣ Mark onboarding as completed
-  await userRepository.update(
-    {id: user_id },
-    { onboarding_completed: true }
-  );
+  await userRepository.update({ id: user_id }, { onboarding_completed: true });
   return userProfileRepository.findOne({
     where: { user_id },
   });
 };
 
-export const upsertUserPreferences = async (
-  data: Partial<UserPreference>,
-) => {
+export const upsertUserPreferences = async (data: Partial<UserPreference>) => {
   const { user_id } = data;
 
   if (!user_id) {
@@ -201,13 +199,10 @@ export const upsertUserPreferences = async (
     min_age: data.min_age,
     max_age: data.max_age,
     max_distance_km: data.max_distance_km,
-    min_education_level: data.min_education_level ,
+    min_education_level: data.min_education_level,
   };
 
-  await userPreferenceRepository.upsert(
-    payload,
-    ["user_id"],
-  );
+  await userPreferenceRepository.upsert(payload, ["user_id"]);
 
   return userPreferenceRepository.findOne({
     where: { user_id },
@@ -292,6 +287,10 @@ export const upsertUserProfile2 = async (data: Partial<UserProfile>) => {
     "profile_photos",
     "habits",
     "marriage_priority",
+    "city",
+    "country",
+    "latitude",
+    "longitude",
   ];
 
   for (const key of fields) {
@@ -369,8 +368,6 @@ export const updateSingleUserFieldService = async (payload: {
   };
 };
 
-
-
 export const updateMultipleUserFieldsService = async (payload: {
   user_id: string;
   fields: Partial<{
@@ -386,16 +383,24 @@ export const updateMultipleUserFieldsService = async (payload: {
   if (!user_id || !fields || Object.keys(fields).length === 0) {
     throwError(ERRORS.BAD_REQUEST, "user_id and fields are required");
   }
-    console.log("two");
+  console.log("two");
 
-
-  const allowedFields = ["show_online_status", "show_email", "show_phone", "photo_visibility"];
-  const invalidFields = Object.keys(fields).filter(f => !allowedFields.includes(f));
+  const allowedFields = [
+    "show_online_status",
+    "show_email",
+    "show_phone",
+    "photo_visibility",
+  ];
+  const invalidFields = Object.keys(fields).filter(
+    (f) => !allowedFields.includes(f),
+  );
   if (invalidFields.length > 0) {
-    throwError(ERRORS.BAD_REQUEST, `Fields not allowed to update: ${invalidFields.join(", ")}`);
+    throwError(
+      ERRORS.BAD_REQUEST,
+      `Fields not allowed to update: ${invalidFields.join(", ")}`,
+    );
   }
-      console.log("two");
-
+  console.log("two");
 
   const user = await userRepository.findOne({ where: { id: user_id } });
   console.log(user);
@@ -412,7 +417,11 @@ export const updateMultipleUserFieldsService = async (payload: {
       }
     }
     if (key === "photo_visibility") {
-      if (!["hidden", "blurred_preview", "visible_to_matches"].includes(value as string)) {
+      if (
+        !["hidden", "blurred_preview", "visible_to_matches"].includes(
+          value as string,
+        )
+      ) {
         throwError(ERRORS.BAD_REQUEST, "Invalid photo_visibility value");
       }
     }

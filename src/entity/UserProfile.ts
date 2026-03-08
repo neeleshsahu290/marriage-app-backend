@@ -39,13 +39,11 @@ export enum MaritalStatus {
   WIDOWED = "WIDOWED",
 }
 
-
 export enum FamilyType {
   NUCLEAR = "NUCLEAR",
   JOINT = "JOINT",
   EXTENDED = "EXTENDED",
 }
-
 
 export enum ParentsStatus {
   LIVING_TOGETHER = "LIVING_TOGETHER",
@@ -94,7 +92,6 @@ export enum MarriagePriority {
   TWO_PLUS_YEARS = "TWO_PLUS_YEARS",
 }
 
-
 @Entity({ name: "user_profile", synchronize: true })
 export class UserProfile {
   @PrimaryColumn("uuid")
@@ -109,8 +106,8 @@ export class UserProfile {
   @Column({ type: "enum", enum: Gender })
   gender: string;
 
-@Column({ type: "decimal", precision: 5, scale: 2, nullable: true })
-height_cm?: number;
+  @Column({ type: "decimal", precision: 5, scale: 2, nullable: true })
+  height_cm?: number;
 
   @Column({
     type: "enum",
@@ -118,13 +115,12 @@ height_cm?: number;
   })
   religion: string;
 
-@Column({
-  type: "enum",
-  enum: ReligiousFaith,
-  nullable: true,
-})
-religious_faith?: ReligiousFaith | null;
-
+  @Column({
+    type: "enum",
+    enum: ReligiousFaith,
+    nullable: true,
+  })
+  religious_faith?: ReligiousFaith | null;
 
   @Column({ type: "jsonb", nullable: true })
   languages_known?: any;
@@ -148,11 +144,11 @@ religious_faith?: ReligiousFaith | null;
   family_type: string;
 
   @Column({
-  type: "enum",
-  enum: ParentsStatus,
-  nullable: true,
-})
-parents_status: ParentsStatus | null;
+    type: "enum",
+    enum: ParentsStatus,
+    nullable: true,
+  })
+  parents_status: ParentsStatus | null;
 
   @Column({
     type: "enum",
@@ -184,11 +180,21 @@ parents_status: ParentsStatus | null;
   })
   marriage_priority: string;
 
+  @Column({ type: "text", nullable: true })
+  city?: string;
+
+  @Column({ type: "text", nullable: true })
+  country?: string;
+
+  @Column({ type: "decimal", precision: 10, scale: 7, nullable: true })
+  latitude?: number;
+
+  @Column({ type: "decimal", precision: 10, scale: 7, nullable: true })
+  longitude?: number;
+
   @CreateDateColumn({ type: "timestamp" })
   created_at: Date;
 
   @UpdateDateColumn({ type: "timestamp" })
   updated_at: Date;
-
-
 }

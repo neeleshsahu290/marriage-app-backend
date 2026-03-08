@@ -41,11 +41,13 @@ export const updateMatchStatus = async (
       status !== MatchStatus.SENT &&
       status !== MatchStatus.RECOMMENDED &&
       status !== MatchStatus.PASS
+      
     ) {
       throw new Error("Invalid status");
     }
 
-    const data = await changeMatchStatus(match_id, status);
+    const user_id = req.user!.user_id;
+    const data = await changeMatchStatus(match_id, user_id, status);
 
     res.json({ success: true, data });
   } catch (e) {
@@ -60,8 +62,9 @@ export const blockRequest = async (
 ) => {
   try {
     const { match_id } = req.body;
+    const user_id = req.user!.user_id;
 
-    const data = await changeMatchStatus(match_id, MatchStatus.BLOCKED);
+    const data = await changeMatchStatus(match_id, user_id, MatchStatus.BLOCKED);
 
     res.json({ success: true, data });
   } catch (e) {
@@ -77,7 +80,8 @@ export const passRequest = async (
   try {
     const { match_id } = req.body;
 
-    const data = await changeMatchStatus(match_id, MatchStatus.PASS);
+    const user_id = req.user!.user_id;
+    const data = await changeMatchStatus(match_id, user_id, MatchStatus.PASS);
 
     res.json({ success: true, data });
   } catch (e) {
