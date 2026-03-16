@@ -65,6 +65,10 @@ export const createUserService = async (payload: any) => {
       photo_visibility: user!.photo_visibility,
       onboarding_completed: user!.onboarding_completed,
       created_at: savedUser.created_at,
+      subscription_active: user!.subscription_active,
+      subscription_plan: user!.subscription_plan,
+      subscription_expire: user!.subscription_expire,
+      sent_requests: user!.sent_requests,
     },
   };
 };
@@ -118,8 +122,49 @@ export const loginService = async ({
       show_phone: user!.show_phone,
       photo_visibility: user!.photo_visibility,
       onboarding_completed: user!.onboarding_completed,
+      subscription_active: user!.subscription_active,
+      subscription_plan: user!.subscription_plan,
+      subscription_expire: user!.subscription_expire,
+      sent_requests: user!.sent_requests,
       profile: profile,
     },
+  };
+};
+
+/**
+ * CHANGE PASSWORD SERVICE
+ */
+export const changePasswordService = async ({
+  email,
+  phone,
+  password,
+}: {
+  email?: string;
+  phone?: string;
+  password: string;
+}) => {
+  if ((!email && !phone) || !password) {
+    throwError(ERRORS.BAD_REQUEST, "Email/phone and password are required");
+  }
+
+  // find user
+  const user = await userRepository.findOne({
+    where: email ? { email } : { phone },
+  });
+
+  if (!user) {
+    throwError(ERRORS.NOT_FOUND, "User not found");
+  }
+
+  // hash password
+  const passwordHash = await hashPassword(password);
+
+  user!.password_hash = passwordHash as string;
+
+  await userRepository.save(user!);
+
+  return {
+    message: "Password changed successfully",
   };
 };
 
@@ -180,7 +225,7 @@ export const upsertUserProfile = async (data: Partial<UserProfile>) => {
 
   await userProfileRepository.upsert(payload, ["user_id"]);
 
-  // 2️⃣ Mark onboarding as completed
+  //  Mark onboarding as completed
   await userRepository.update({ id: user_id }, { onboarding_completed: true });
   return userProfileRepository.findOne({
     where: { user_id },

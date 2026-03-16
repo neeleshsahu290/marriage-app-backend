@@ -27,7 +27,7 @@ export class Message {
   @Column({ type: "text" })
   message: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: "timestamptz" })
   created_at: Date;
 
   @Column({ default: false })

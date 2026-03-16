@@ -65,23 +65,35 @@ export class User {
   photo_visibility: PhotoVisibility;
 
   @Column({
-  type: "decimal",
-  precision: 10,
-  scale: 7,
-  nullable: true,
-})
-latitude?: number;
+    type: "decimal",
+    precision: 10,
+    scale: 7,
+    nullable: true,
+  })
+  latitude?: number;
 
-@Column({
-  type: "decimal",
-  precision: 10,
-  scale: 7,
-  nullable: true,
-})
-longitude?: number;
+  @Column({
+    type: "decimal",
+    precision: 10,
+    scale: 7,
+    nullable: true,
+  })
+  longitude?: number;
 
   @Column({ type: "timestamp", nullable: true })
   last_recommended_at?: Date;
+
+  @Column({ default: false })
+  subscription_active: boolean;
+
+  @Column({ type: "varchar", nullable: true })
+  subscription_plan?: string|null;
+
+  @Column({ type: "timestamp", nullable: true })
+  subscription_expire?: Date|null;
+
+  @Column({ type: "int", default: 0 })
+  sent_requests: number;
 
   @CreateDateColumn()
   created_at: Date;

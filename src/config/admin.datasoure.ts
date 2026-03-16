@@ -8,6 +8,7 @@ import { Match } from "../entity/Match";
 import { UserPreference } from "../entity/UserPreference";
 import { Conversation } from "../entity/Conversation";
 import { Message } from "../entity/Messages";
+import { Subscription } from "../entity/Subscription";
 
 export const AdminDataSource = new DataSource({
   type: "postgres",
@@ -24,7 +25,7 @@ export const AdminDataSource = new DataSource({
 
   logging: false,
 
-  entities: [User, UserProfile, Match, UserPreference,Conversation,  Message
+  entities: [User, UserProfile, Match, UserPreference,Conversation,  Message,Subscription
 ],
 
   migrations: [],

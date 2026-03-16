@@ -1,11 +1,13 @@
 import { Request, Response, NextFunction } from "express";
 
-import { createUserService, createUsersWithProfilesBulkService, loginService } from "../services/user.service";
+import { changePasswordService, createUserService, createUsersWithProfilesBulkService, loginService } from "../services/user.service";
 import {
   sendEmailOtpService,
   verifyEmailOtpService,
   verifyPhoneOtpService,
   sendPhoneOtpService,
+  sendForgotPasswordOtpService,
+  verifyForgotPasswordOtpService,
 } from "../services/auth.service";
 
 import { success } from "../utils/success.util";
@@ -165,6 +167,71 @@ export const verifyPhoneOtp = async (
   }
 };
 
+
+/**
+ * SEND FORGOT PASSWORD OTP
+ */
+export const sendForgotPasswordOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+
+    const { email, phone } = req.body as {
+      email?: string;
+      phone?: string;
+    };
+
+    await sendForgotPasswordOtpService(email, phone);
+
+    return success(
+      res,
+      SUCCESS.OK,
+      null,
+      "OTP sent successfully"
+    );
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * VERIFY FORGOT PASSWORD OTP
+ */
+export const verifyForgotPasswordOtp = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+
+    const { email, phone, otp } = req.body as {
+      email?: string;
+      phone?: string;
+      otp: string;
+    };
+
+    const data = await verifyForgotPasswordOtpService(
+      email,
+      phone,
+      otp
+    );
+
+    return success(
+      res,
+      SUCCESS.OK,
+      data,
+      "OTP verified successfully"
+    );
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 /**
  * ME
  */
@@ -203,6 +270,40 @@ export const createBulkUser = async (
       SUCCESS.CREATED,
       user,
       "User created successfully"
+    );
+
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * CHANGE PASSWORD
+ */
+export const changePassword = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+
+    const { email, phone, password } = req.body as {
+      email?: string;
+      phone?: string;
+      password: string;
+    };
+
+    const data = await changePasswordService({
+      email,
+      phone,
+      password,
+    });
+
+    return success(
+      res,
+      SUCCESS.OK,
+      data,
+      "Password changed successfully"
     );
 
   } catch (error) {

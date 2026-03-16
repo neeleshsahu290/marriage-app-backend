@@ -85,3 +85,100 @@ export const verifyPhoneOtpService = async (
 
   return authRepository.verifyPhoneOtp(phone, otp);
 };
+
+
+/**
+ * SEND OTP FOR FORGOT PASSWORD
+ * Accepts email OR phone
+ */
+export const sendForgotPasswordOtpService = async (
+  email?: string,
+  phone?: string
+): Promise<boolean> => {
+
+  if (!email && !phone) {
+    throwError(ERRORS.BAD_REQUEST, "Email or Phone is required");
+  }
+
+  let user = null;
+
+  // check by email
+  if (email) {
+    user = await userRepository.findByEmail(email);
+
+    if (!user) {
+      throwError(ERRORS.NOT_FOUND, "User not found with this email");
+    }
+
+    await authRepository.sendEmailOtp(email);
+  }
+
+  //  check by phone
+  if (phone) {
+    user = await userRepository.findByPhone(phone);
+
+    if (!user) {
+      throwError(ERRORS.NOT_FOUND, "User not found with this phone");
+    }
+    return true;
+
+  //  await authRepository.sendPhoneOtp(phone);
+  }
+
+  return true;
+};
+
+
+/**
+ * VERIFY OTP (EMAIL OR PHONE)
+ */
+export const verifyForgotPasswordOtpService = async (
+  email?: string,
+  phone?: string,
+  otp?: string
+): Promise<any> => {
+
+  if ((!email && !phone) || !otp) {
+    throwError(ERRORS.BAD_REQUEST, "Email/Phone and OTP are required");
+  }
+
+  let user = null;
+
+  //  check user by email
+  if (email) {
+    user = await userRepository.findByEmail(email);
+
+    if (!user) {
+      throwError(ERRORS.NOT_FOUND, "User not found with this email");
+    }
+  }
+
+  //  check user by phone
+  if (phone) {
+    user = await userRepository.findByPhone(phone);
+
+    if (!user) {
+      throwError(ERRORS.NOT_FOUND, "User not found with this phone");
+    }
+  }
+
+  //  default OTP (for testing)
+  if (otp === "666777") {
+    return {
+      verified: true,
+      isDefaultOtp: true,
+      email,
+      phone,
+    };
+  }
+
+  //  verify email otp
+  if (email) {
+    return authRepository.verifyEmailOtp(email, otp);
+  }
+
+  //  verify phone otp
+  if (phone) {
+    return authRepository.verifyPhoneOtp(phone, otp);
+  }
+}

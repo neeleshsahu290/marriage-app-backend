@@ -1,12 +1,10 @@
-
 import { DeepPartial } from "typeorm";
 import { AdminDataSource } from "../config/admin.datasoure";
-import { Match,MatchStatus } from "../entity/Match";
+import { Match, MatchStatus } from "../entity/Match";
 import { UserProfile } from "../entity/UserProfile";
 import { throwError } from "../utils/error.util";
 import { ERRORS } from "../utils/error-status.util";
 import { User } from "../entity/User";
-
 
 const matchRepository = AdminDataSource.getRepository(Match);
 const userProfileRepository = AdminDataSource.getRepository(UserProfile);
@@ -16,14 +14,13 @@ export const sendMatchRequest = async (
   requester_id: string,
   receiver_id: string,
 ) => {
-
   const existing = await matchRepository.findOne({
     where: { requester_id, receiver_id },
   });
 
   // If exists -> update to SENT
   if (existing) {
-    existing.status = MatchStatus.SENT; 
+    existing.status = MatchStatus.SENT;
     return matchRepository.save(existing);
   }
 
@@ -34,15 +31,17 @@ export const sendMatchRequest = async (
     status: MatchStatus.SENT,
   } as DeepPartial<Match>);
 
-  return matchRepository.save(match);
+  const savedMatch = await matchRepository.save(match);
+
+  await userRepository.increment({ id: requester_id }, "sent_requests", 1);
+  return savedMatch;
 };
 
 export const changeMatchStatus = async (
   match_id: string,
   user_id: string,
-  status: MatchStatus
+  status: MatchStatus,
 ) => {
-
   const match = await matchRepository.findOneBy({ id: match_id });
 
   if (!match) {
@@ -50,10 +49,7 @@ export const changeMatchStatus = async (
   }
 
   // ensure user belongs to this match
-  if (
-    match.requester_id !== user_id &&
-    match.receiver_id !== user_id
-  ) {
+  if (match.requester_id !== user_id && match.receiver_id !== user_id) {
     throw new Error("Unauthorized action");
   }
 
@@ -68,10 +64,7 @@ export const changeMatchStatus = async (
 
 export const getUserMatches = async (user_id: string) => {
   const matches = await matchRepository.find({
-    where: [
-      { requester_id: user_id },
-      { receiver_id: user_id },
-    ],
+    where: [{ requester_id: user_id }, { receiver_id: user_id }],
     relations: {
       requesterProfile: true,
       receiverProfile: true,
@@ -83,17 +76,14 @@ export const getUserMatches = async (user_id: string) => {
     },
   });
 
-  return matches.map(match => {
-
+  return matches.map((match) => {
     const isRequester = match.requester_id === user_id;
 
     const otherProfile = isRequester
       ? match.receiverProfile
       : match.requesterProfile;
 
-    const otherUser = isRequester
-      ? match.receiverUser
-      : match.requesterUser;
+    const otherUser = isRequester ? match.receiverUser : match.requesterUser;
 
     return {
       match_id: match.id,
@@ -125,7 +115,6 @@ export const getUserMatches = async (user_id: string) => {
   });
 };
 
-
 export const getSentRequests = async (user_id: string) => {
   return matchRepository.find({
     where: {
@@ -134,7 +123,6 @@ export const getSentRequests = async (user_id: string) => {
     },
   });
 };
-
 
 export const getReceivedRequests = async (user_id: string) => {
   return matchRepository.find({
@@ -145,7 +133,6 @@ export const getReceivedRequests = async (user_id: string) => {
   });
 };
 
-
 export const getAcceptedMatches = async (user_id: string) => {
   return matchRepository.find({
     where: [
@@ -155,12 +142,8 @@ export const getAcceptedMatches = async (user_id: string) => {
   });
 };
 
-
-
 export const getMatchLists = async (user_id: string) => {
-
   const [sent, received, accepted] = await Promise.all([
-
     // Sent by user (pending)
     matchRepository.find({
       where: {
@@ -184,17 +167,16 @@ export const getMatchLists = async (user_id: string) => {
         { receiver_id: user_id, status: MatchStatus.ACCEPTED },
       ],
     }),
-
   ]);
 
   return { sent, received, accepted };
 };
 
-
-export const createRecommendedMatchesService = async (currentUserId: string) => {
-
+export const createRecommendedMatchesService = async (
+  currentUserId: string,
+) => {
   const currentUser = await userRepository.findOne({
-    where: { id: currentUserId }
+    where: { id: currentUserId },
   });
 
   if (!currentUser) {
@@ -216,28 +198,29 @@ export const createRecommendedMatchesService = async (currentUserId: string) => 
   // }
 
   const currentProfile = await userProfileRepository.findOne({
-    where: { user_id: currentUserId }
+    where: { user_id: currentUserId },
   });
 
   if (!currentProfile) {
     throwError(ERRORS.NOT_FOUND, "User profile not found");
   }
 
-  const targetGender =
-    currentProfile!.gender === "MALE" ? "FEMALE" : "MALE";
+  const targetGender = currentProfile!.gender === "MALE" ? "FEMALE" : "MALE";
 
   // ⚡ FAST exclusion using subquery
   const users = await userProfileRepository
     .createQueryBuilder("profile")
     .where("profile.gender = :gender", { gender: targetGender })
     .andWhere("profile.user_id != :currentUserId", { currentUserId })
-    .andWhere(`
+    .andWhere(
+      `
       profile.user_id NOT IN (
         SELECT receiver_id FROM matches WHERE requester_id = :currentUserId
         UNION
         SELECT requester_id FROM matches WHERE receiver_id = :currentUserId
       )
-    `)
+    `,
+    )
     .setParameter("currentUserId", currentUserId)
     // .limit(10)
     .getMany();
@@ -246,33 +229,30 @@ export const createRecommendedMatchesService = async (currentUserId: string) => 
     return { created: 0, matches: [] };
   }
 
-  const matchesToCreate = users.map(profile =>
+  const matchesToCreate = users.map((profile) =>
     matchRepository.create({
       requester_id: currentUserId,
       receiver_id: profile.user_id,
-      status: MatchStatus.RECOMMENDED
-    })
+      status: MatchStatus.RECOMMENDED,
+    }),
   );
 
   const savedMatches = await matchRepository.save(matchesToCreate);
 
   await userRepository.update(
     { id: currentUserId },
-    { last_recommended_at: new Date() }
+    { last_recommended_at: new Date() },
   );
 
   return {
     created: savedMatches.length,
-    matches: savedMatches
+    matches: savedMatches,
   };
 };
 
-
-
 export const makeDummmyMatchesService = async (currentUserId: string) => {
-
   const currentUser = await userRepository.findOne({
-    where: { id: currentUserId }
+    where: { id: currentUserId },
   });
 
   if (!currentUser) {
@@ -280,28 +260,29 @@ export const makeDummmyMatchesService = async (currentUserId: string) => {
   }
 
   const currentProfile = await userProfileRepository.findOne({
-    where: { user_id: currentUserId }
+    where: { user_id: currentUserId },
   });
 
   if (!currentProfile) {
     throwError(ERRORS.NOT_FOUND, "User profile not found");
   }
 
-  const targetGender =
-    currentProfile!.gender === "Male" ? "Female" : "Male";
+  const targetGender = currentProfile!.gender === "Male" ? "Female" : "Male";
 
   // ⚡ Fast DB-level exclusion
   const users = await userProfileRepository
     .createQueryBuilder("profile")
     .where("profile.gender = :gender", { gender: targetGender })
     .andWhere("profile.user_id != :currentUserId", { currentUserId })
-    .andWhere(`
+    .andWhere(
+      `
       profile.user_id NOT IN (
         SELECT receiver_id FROM matches WHERE requester_id = :currentUserId
         UNION
         SELECT requester_id FROM matches WHERE receiver_id = :currentUserId
       )
-    `)
+    `,
+    )
     .setParameter("currentUserId", currentUserId)
     .limit(5)
     .getMany();
@@ -311,18 +292,18 @@ export const makeDummmyMatchesService = async (currentUserId: string) => {
   }
 
   // 👈 Dummy SENT requests (others sending to current user)
-  const matchesToCreate = users.map(profile =>
+  const matchesToCreate = users.map((profile) =>
     matchRepository.create({
       requester_id: profile.user_id,
       receiver_id: currentUserId,
-      status: MatchStatus.SENT
-    })
+      status: MatchStatus.SENT,
+    }),
   );
 
   const savedMatches = await matchRepository.save(matchesToCreate);
 
   return {
     created: savedMatches.length,
-    matches: savedMatches
+    matches: savedMatches,
   };
 };
